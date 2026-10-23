@@ -19,8 +19,8 @@ import (
 	"testing/fstest"
 	"time"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 const maxTarball = 64 << 20

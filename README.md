@@ -7,7 +7,7 @@ renders the site.
 
 ## Install
 
-Download the binary for your platform from the GitHub releases page and check
+Download the binary for your platform from the [releases page](https://github.com/Fab-IT-ApS/statusctl/releases) and check
 it against `SHA256SUMS`, or build from source with `go build ./cmd/statusctl`.
 
 ## Configure

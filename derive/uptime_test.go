@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 var cph, _ = time.LoadLocation("Europe/Copenhagen")

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 func loadRepo(t *testing.T, dir string) *model.State {

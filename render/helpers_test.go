@@ -8,7 +8,7 @@ import (
 	"testing/fstest"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 const testConfig = `site:

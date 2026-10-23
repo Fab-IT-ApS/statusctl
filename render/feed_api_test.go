@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 func TestStatusJSON(t *testing.T) {

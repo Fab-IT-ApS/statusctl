@@ -6,7 +6,7 @@ import (
 	"slices"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 const feedSize = 50

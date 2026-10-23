@@ -3,8 +3,8 @@ package store
 import (
 	"time"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 const testConfig = `site:

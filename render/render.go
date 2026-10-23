@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"statusctl/derive"
-	"statusctl/markdown"
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/derive"
+	"github.com/Fab-IT-ApS/statusctl/markdown"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 //go:embed templates/*.html static/style.css

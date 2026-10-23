@@ -8,7 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 // InputError means the caller asked for something invalid. It is never retried.

@@ -12,9 +12,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"statusctl/model"
-	"statusctl/ops"
-	"statusctl/store"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/store"
 )
 
 type fileConfig struct {

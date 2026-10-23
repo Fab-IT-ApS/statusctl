@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 func localRepo(t *testing.T) Local {

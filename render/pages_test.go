@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 func TestIncidentPage(t *testing.T) {

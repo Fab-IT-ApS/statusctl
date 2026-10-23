@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 var ctx = context.Background()

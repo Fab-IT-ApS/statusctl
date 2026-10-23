@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"statusctl/model"
-	"statusctl/ops"
-	"statusctl/store"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/store"
 )
 
 // mutate opens the store, resolves the author and applies the op built for them.

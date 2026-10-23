@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 // Local reads and writes files in a directory. It does no git operations.

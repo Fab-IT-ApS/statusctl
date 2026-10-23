@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 func TestIndexAllOperational(t *testing.T) {

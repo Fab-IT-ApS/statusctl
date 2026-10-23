@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"statusctl/model"
-	"statusctl/ops"
-	"statusctl/store"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/store"
 )
 
 // Set at release build time with -ldflags -X.

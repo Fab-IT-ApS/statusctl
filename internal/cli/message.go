@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 type msgFlags struct{ text, file string }

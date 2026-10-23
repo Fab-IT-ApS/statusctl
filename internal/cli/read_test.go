@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"statusctl/model"
-	"statusctl/ops"
-	"statusctl/store"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/store"
 )
 
 func seedIncident(t *testing.T, dir, title string) string {

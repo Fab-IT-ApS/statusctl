@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 type NewIncidentArgs struct {

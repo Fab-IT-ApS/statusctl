@@ -1,4 +1,4 @@
-module statusctl
+module github.com/Fab-IT-ApS/statusctl
 
 go 1.27.3
 

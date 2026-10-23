@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 
-	"statusctl/model"
-	"statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
 )
 
 // Op computes a change from current state. It may run more than once when a

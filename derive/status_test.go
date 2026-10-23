@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 type imp = map[string]model.Impact

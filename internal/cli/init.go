@@ -17,7 +17,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"statusctl/store"
+	"github.com/Fab-IT-ApS/statusctl/store"
 )
 
 var (

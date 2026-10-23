@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"statusctl/derive"
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/derive"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 const apiWindow = 90 * 24 * time.Hour

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 func scheduleDB(t *testing.T, s *model.State) *model.Incident {

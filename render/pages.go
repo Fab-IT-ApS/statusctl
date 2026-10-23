@@ -3,7 +3,7 @@ package render
 import (
 	"slices"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 type incidentView struct {

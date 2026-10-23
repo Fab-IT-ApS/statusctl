@@ -11,7 +11,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 
-	"statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/model"
 )
 
 // Raw HTML stays disabled: goldmark omits it unless html.WithUnsafe is set.

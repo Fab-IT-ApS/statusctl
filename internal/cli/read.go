@@ -11,10 +11,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"statusctl/derive"
-	"statusctl/model"
-	"statusctl/ops"
-	"statusctl/render"
+	"github.com/Fab-IT-ApS/statusctl/derive"
+	"github.com/Fab-IT-ApS/statusctl/model"
+	"github.com/Fab-IT-ApS/statusctl/ops"
+	"github.com/Fab-IT-ApS/statusctl/render"
 )
 
 func (a *app) validateCmd() *cobra.Command {
