@@ -1,0 +1,11 @@
+{{define "event-summary"}}<article class="event {{impactClass .Impact}}">
+<h3><a href="{{.Root}}incidents/{{.ID}}/">{{.Title}}</a></h3>
+{{if not .Start.IsZero}}<p class="meta">Scheduled {{fmtTime .Start}} – {{fmtTime .End}}</p>
+{{end}}<p class="meta">{{.Latest.Status.Label}} · {{fmtTime .Latest.At}}</p>
+<div class="message">{{md .Latest.Message}}</div>
+</article>
+{{end}}
+
+{{define "feed-entry"}}{{range .}}<p><strong>{{.Status.Label}}</strong> · {{fmtTime .At}}</p>
+{{md .Message}}
+{{end}}{{end}}

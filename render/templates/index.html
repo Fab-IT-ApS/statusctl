@@ -1,0 +1,21 @@
+{{define "content"}}{{with .Body}}
+<section class="banner {{impactClass .Banner.Impact}}"><h1>{{.Banner.Text}}</h1></section>
+{{if .Active}}<section><h2>Current incidents and maintenance</h2>
+{{range .Active}}{{template "event-summary" .}}{{end}}</section>{{end}}
+{{if .Upcoming}}<section><h2>Upcoming maintenance</h2>
+{{range .Upcoming}}{{template "event-summary" .}}{{end}}</section>{{end}}
+<section class="components"><h2>Components</h2>
+{{range .Groups}}<div class="group">
+{{if .Name}}<h3>{{.Name}}</h3>
+{{end}}{{range .Components}}<div class="component">
+<div class="component-head"><span class="component-name">{{.Name}}</span><span class="status {{impactClass .Status}}">{{.Status.Label}}</span></div>
+{{if .Description}}<p class="description">{{.Description}}</p>
+{{end}}<ol class="uptime" aria-label="Uptime over the last 90 days">{{range .Uptime.Days}}<li class="{{impactClass .Worst}}" title="{{fmtDate .Date}}: {{.Worst.Label}}{{range .Events}} — {{.}}{{end}}"></li>{{end}}</ol>
+<p class="uptime-pct">{{printf "%.2f" .Uptime.Percent}}% uptime over the last 90 days</p>
+</div>
+{{end}}</div>
+{{end}}</section>
+<section><h2>Past 7 days</h2>
+{{if .Recent}}{{range .Recent}}{{template "event-summary" .}}{{end}}{{else}}<p>No incidents reported.</p>{{end}}
+</section>
+{{end}}{{end}}

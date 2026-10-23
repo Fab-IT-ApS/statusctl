@@ -1,0 +1,41 @@
+:root {
+  --bg: #ffffff; --fg: #1d2330; --muted: #5b6475; --border: #dde2ea; --card: #f7f8fa;
+  --operational: #1f9d55; --under-maintenance: #3b82f6; --degraded: #d69e2e;
+  --partial-outage: #dd6b20; --major-outage: #e53e3e;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #11151c; --fg: #e6e9ef; --muted: #9aa3b2; --border: #2a313d; --card: #181d26; }
+}
+.operational { --c: var(--operational); }
+.under-maintenance { --c: var(--under-maintenance); }
+.degraded { --c: var(--degraded); }
+.partial-outage { --c: var(--partial-outage); }
+.major-outage { --c: var(--major-outage); }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main, .site-header, .site-footer { max-width: 52rem; margin: 0 auto; padding: 1rem; }
+a { color: var(--primary); }
+.site-header a { color: var(--fg); text-decoration: none; font-weight: 600; font-size: 1.25rem; }
+.logo { max-height: 3rem; }
+h1, h2, h3 { line-height: 1.25; }
+.banner { border-radius: .5rem; padding: 1rem 1.25rem; color: #fff; background: var(--c); }
+.banner h1 { margin: 0; font-size: 1.4rem; }
+.event { border-left: 4px solid var(--c, var(--border)); background: var(--card);
+  padding: .75rem 1rem; margin: 1rem 0; border-radius: .25rem; overflow-wrap: anywhere; }
+.event h3, .incident h1 { margin: 0 0 .25rem; }
+.meta, .kind { color: var(--muted); font-size: .9rem; margin: .25rem 0; }
+.message p { margin: .25rem 0; }
+.group { border: 1px solid var(--border); border-radius: .5rem; margin: 1rem 0; padding: 0 1rem; }
+.group h3 { margin: .75rem 0 0; }
+.component { padding: .75rem 0; border-top: 1px solid var(--border); }
+.group > .component:first-child, .group h3 + .component { border-top: 0; }
+.component-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.status { color: var(--c); font-weight: 600; }
+.uptime { display: flex; gap: 2px; list-style: none; padding: 0; margin: .5rem 0 0; height: 2rem; }
+.uptime li { flex: 1; min-width: 1px; border-radius: 2px; background: var(--c); }
+.uptime-pct, .description { color: var(--muted); font-size: .85rem; margin: .25rem 0 0; }
+.timeline { list-style: none; padding: 0; }
+.timeline li { border-left: 2px solid var(--border); padding: 0 0 1rem 1rem; overflow-wrap: anywhere; }
+.site-footer { color: var(--muted); font-size: .85rem; }

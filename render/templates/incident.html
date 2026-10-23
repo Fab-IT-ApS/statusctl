@@ -1,0 +1,12 @@
+{{define "content"}}{{with .Body}}
+<article class="incident">
+<p class="kind">{{if eq .Kind "maintenance"}}Maintenance{{else}}Incident{{end}}</p>
+<h1>{{.Title}}</h1>
+<p class="meta">Affects: {{range $i, $c := .ComponentNames}}{{if $i}}, {{end}}{{$c}}{{end}}</p>
+{{if not .Start.IsZero}}<p class="meta">Scheduled {{fmtTime .Start}} – {{fmtTime .End}}</p>
+{{end}}<ol class="timeline">
+{{range .Timeline}}<li><p class="meta"><strong>{{.Status.Label}}</strong> · {{fmtTime .At}} · {{.Author}}</p>
+<div class="message">{{md .Message}}</div></li>
+{{end}}</ol>
+</article>
+{{end}}{{end}}

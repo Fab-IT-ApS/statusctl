@@ -1,0 +1,23 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .Title}}{{.Title}} · {{end}}{{.Site.Name}}</title>
+<link rel="stylesheet" href="{{.Root}}assets/style.css">
+<link rel="stylesheet" href="{{.Root}}assets/theme.css">
+{{if .HasCustomCSS}}<link rel="stylesheet" href="{{.Root}}assets/custom.css">
+{{end}}<link rel="alternate" type="application/atom+xml" title="{{.Site.Name}}" href="{{.Root}}feed.atom">
+</head>
+<body>
+<header class="site-header"><a href="{{.Root}}">{{if .LogoPath}}<img class="logo" src="{{.Root}}{{.LogoPath}}" alt="{{.Site.Name}}">{{else}}{{.Site.Name}}{{end}}</a></header>
+<main>
+{{template "content" .}}
+</main>
+<footer class="site-footer">
+<p>Last updated {{fmtTime .Updated}} · <a href="{{.Root}}history/">History</a> · <a href="{{.Root}}feed.atom">Atom feed</a> · <a href="{{.Root}}api/v1/status.json">JSON</a></p>
+{{if .Site.FooterLinks}}<p>{{range $i, $l := .Site.FooterLinks}}{{if $i}} · {{end}}<a href="{{$l.URL}}">{{$l.Label}}</a>{{end}}</p>{{end}}
+</footer>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,6 @@
+{{define "content"}}{{with .Body}}
+<h1>History</h1>
+{{if .Months}}<ul class="months">
+{{range .Months}}<li><a href="{{$.Root}}history/{{.Key}}/">{{.Label}}</a> ({{.Count}})</li>
+{{end}}</ul>{{else}}<p>No incidents or maintenance recorded yet.</p>{{end}}
+{{end}}{{end}}

@@ -1,0 +1,5 @@
+{{define "content"}}{{with .Body}}
+<h1>{{.Label}}</h1>
+{{range .Events}}{{template "event-summary" .}}{{end}}
+<p><a href="{{$.Root}}history/">All months</a></p>
+{{end}}{{end}}
