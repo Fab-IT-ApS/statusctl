@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"strings"
 	"testing"
@@ -255,5 +256,35 @@ func TestGitHubDeleteRetriesOnConflict(t *testing.T) {
 	}
 	if _, ok := head["notes.txt"]; !ok {
 		t.Error("the concurrent write was lost")
+	}
+}
+
+func TestGitHubRetractAlreadyDeleted(t *testing.T) {
+	files := baseFiles()
+	files["incidents/2026-10-22-other.json"] = otherIncidentJSON(t)
+	f, g := newFake(t, files)
+	f.beforePatch = func(f *fakeGitHub, n int) {
+		if n == 0 {
+			f.mu.Lock()
+			tree := maps.Clone(f.trees[f.commits[f.head].tree])
+			delete(tree, "incidents/2026-10-22-other.json")
+			f.n++
+			tid, cid := fmt.Sprintf("t%d", f.n), fmt.Sprintf("c%d", f.n)
+			f.trees[tid] = tree
+			f.commits[cid] = fakeCommit{tree: tid, parent: f.head, message: "concurrent delete"}
+			f.head = cid
+			f.mu.Unlock()
+		}
+	}
+	op := func(s *model.State) (*ops.Result, error) {
+		return ops.RetractEvent(s, ops.RetractArgs{Ref: "2026-10-22-other", Author: "Bo"}, testNow)
+	}
+	_, err := g.Apply(ctx, op)
+	var ie *ops.InputError
+	if !errors.As(err, &ie) {
+		t.Fatalf("want an InputError once the event is gone, got %v", err)
+	}
+	if _, c := f.headCommit(); c.message != "concurrent delete" {
+		t.Errorf("nothing more may be committed, head is %q", c.message)
 	}
 }

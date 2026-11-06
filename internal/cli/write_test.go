@@ -219,3 +219,20 @@ func TestRetractForce(t *testing.T) {
 	wantCode(t, runLater(), 2, "--force")
 	wantCode(t, runLater("--force"), 0, "")
 }
+
+func TestRetractJSONSaysRetracted(t *testing.T) {
+	dir := newRepo(t)
+	wantCode(t, run(t, "--dir", dir, "incident", "new", "A", "-c", "api=degraded", "-m", "m"), 0, "")
+	r := run(t, "--dir", dir, "incident", "retract", "2026-10-23-a", "--json")
+	wantCode(t, r, 0, "")
+	var out map[string]any
+	if err := json.Unmarshal([]byte(r.stdout), &out); err != nil {
+		t.Fatalf("%v: %q", err, r.stdout)
+	}
+	if out["retracted"] != true {
+		t.Errorf("json must say the event was retracted: %v", out)
+	}
+	if _, ok := out["status"]; ok {
+		t.Errorf("a retracted event has no status on the page: %v", out)
+	}
+}

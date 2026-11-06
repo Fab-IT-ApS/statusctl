@@ -32,11 +32,16 @@ func (a *app) mutate(cmd *cobra.Command, authorFlag string, build func(author st
 	}
 	l := res.Incident.Latest()
 	if a.jsonOut {
-		out := map[string]string{
+		out := map[string]any{
 			"id": res.Incident.ID, "kind": string(res.Incident.Kind), "status": string(l.Status), "url": res.URL,
 		}
 		if res.Action != "" {
 			out["action"] = res.Action
+		}
+		// A retracted event is no longer on the page, so it has no status.
+		if len(res.Deleted) > 0 {
+			delete(out, "status")
+			out["retracted"] = true
 		}
 		return a.printJSON(out)
 	}
