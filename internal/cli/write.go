@@ -184,8 +184,8 @@ func (a *app) maintenanceNewCmd() *cobra.Command {
 	}
 	msg.register(cmd)
 	cmd.Flags().StringArrayVarP(&comps, "component", "c", nil, "affected component ID (repeatable)")
-	cmd.Flags().StringVar(&start, "start", "", "start: RFC 3339, or YYYY-MM-DDTHH:MM in the site timezone")
-	cmd.Flags().StringVar(&end, "end", "", "end: RFC 3339, or YYYY-MM-DDTHH:MM in the site timezone")
+	cmd.Flags().StringVar(&start, "start", "", "start: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
+	cmd.Flags().StringVar(&end, "end", "", "end: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
 	cmd.Flags().StringVar(&author, "author", "", "display name shown on the page")
 	return cmd
 }

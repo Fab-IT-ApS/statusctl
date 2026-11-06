@@ -107,3 +107,19 @@ func TestParseTime(t *testing.T) {
 	_, err = ParseTime("tomorrow", cph)
 	wantInputError(t, err, "RFC 3339")
 }
+
+func TestParseTimeSpaceForm(t *testing.T) {
+	loc, err := time.LoadLocation("Europe/Copenhagen")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := ParseTime("2026-11-10 22:00", loc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := time.Date(2026, 11, 10, 21, 0, 0, 0, time.UTC); !got.Equal(want) {
+		t.Errorf("ParseTime = %v, want %v", got, want)
+	}
+	_, err = ParseTime("2026-11-10 25:00", loc)
+	wantInputError(t, err, "YYYY-MM-DD HH:MM")
+}
