@@ -184,3 +184,76 @@ func TestGitHubNetworkErrorRedactsQuery(t *testing.T) {
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func retractOp(id string) Op {
+	return func(s *model.State) (*ops.Result, error) {
+		in := s.Incident(id)
+		if in == nil {
+			return nil, &ops.InputError{Msg: "no " + id}
+		}
+		return &ops.Result{Incident: in, Deleted: []string{in.Path()}, Action: "retracted by Bo"}, nil
+	}
+}
+
+func TestGitHubCommitAuthorOverride(t *testing.T) {
+	f, g := newFake(t, baseFiles())
+	op := func(s *model.State) (*ops.Result, error) {
+		res, err := ops.NewIncident(s, ops.NewIncidentArgs{
+			Title: "API slow", Impacts: map[string]model.Impact{"api": model.Degraded},
+			Message: "Investigating.", Author: "Fab:IT Support",
+		}, testNow)
+		if err == nil {
+			res.CommitAuthor = "Mette"
+		}
+		return res, err
+	}
+	if _, err := g.Apply(ctx, op); err != nil {
+		t.Fatal(err)
+	}
+	if _, c := f.headCommit(); c.author["name"] != "Mette" {
+		t.Errorf("commit author = %v, want Mette", c.author)
+	}
+	s, err := g.Load(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a := s.Incidents[0].Latest().Author; a != "Fab:IT Support" {
+		t.Errorf("page author = %q", a)
+	}
+}
+
+func TestGitHubDeletes(t *testing.T) {
+	files := baseFiles()
+	files["incidents/2026-10-22-other.json"] = otherIncidentJSON(t)
+	f, g := newFake(t, files)
+	if _, err := g.Apply(ctx, retractOp("2026-10-22-other")); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := f.headFiles()["incidents/2026-10-22-other.json"]; ok {
+		t.Error("retracted file is still in the head")
+	}
+	if _, c := f.headCommit(); !strings.HasSuffix(c.message, "retracted by Bo") {
+		t.Errorf("message = %q", c.message)
+	}
+}
+
+func TestGitHubDeleteRetriesOnConflict(t *testing.T) {
+	files := baseFiles()
+	files["incidents/2026-10-22-other.json"] = otherIncidentJSON(t)
+	f, g := newFake(t, files)
+	f.beforePatch = func(f *fakeGitHub, n int) {
+		if n == 0 {
+			f.pushDirect(map[string]string{"notes.txt": "concurrent"})
+		}
+	}
+	if _, err := g.Apply(ctx, retractOp("2026-10-22-other")); err != nil {
+		t.Fatal(err)
+	}
+	head := f.headFiles()
+	if _, ok := head["incidents/2026-10-22-other.json"]; ok {
+		t.Error("retracted file survived the retry")
+	}
+	if _, ok := head["notes.txt"]; !ok {
+		t.Error("the concurrent write was lost")
+	}
+}

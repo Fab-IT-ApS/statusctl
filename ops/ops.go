@@ -22,13 +22,27 @@ func inputErrorf(format string, args ...any) error {
 
 // Result is the event an operation produced and the files to write for it.
 type Result struct {
-	Incident *model.Incident
-	URL      string
-	Files    map[string][]byte
+	Incident     *model.Incident
+	URL          string
+	Files        map[string][]byte
+	Deleted      []string // repository paths to remove
+	Action       string   // commit-message suffix; empty means the latest status
+	CommitAuthor string   // commit author name; empty means the latest update's author
 }
 
 func (r *Result) CommitMessage() string {
-	return fmt.Sprintf("%s %s: %s", r.Incident.Kind, r.Incident.ID, r.Incident.Latest().Status)
+	what := r.Action
+	if what == "" {
+		what = string(r.Incident.Latest().Status)
+	}
+	return fmt.Sprintf("%s %s: %s", r.Incident.Kind, r.Incident.ID, what)
+}
+
+func (r *Result) CommitAuthorName() string {
+	if r.CommitAuthor != "" {
+		return r.CommitAuthor
+	}
+	return r.Incident.Latest().Author
 }
 
 // Find resolves an exact ID or a unique ID prefix.

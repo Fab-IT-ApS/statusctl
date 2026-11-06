@@ -62,3 +62,17 @@ func TestLocalLoadInvalid(t *testing.T) {
 		t.Fatalf("want ValidationError, got %v", err)
 	}
 }
+
+func TestLocalDeletes(t *testing.T) {
+	l := localRepo(t)
+	res, err := l.Apply(context.Background(), newIncidentOp("API slow", nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Apply(context.Background(), retractOp(res.Incident.ID)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(l.Dir, "incidents", res.Incident.ID+".json")); !os.IsNotExist(err) {
+		t.Errorf("retracted file still exists: %v", err)
+	}
+}

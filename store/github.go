@@ -182,15 +182,13 @@ func (g *GitHub) tarball(ctx context.Context, sha string) (fs.FS, error) {
 }
 
 func (g *GitHub) commit(ctx context.Context, snap *snapshot, res *ops.Result, email string) (string, error) {
-	type entry struct {
-		Path    string `json:"path"`
-		Mode    string `json:"mode"`
-		Type    string `json:"type"`
-		Content string `json:"content"`
-	}
-	var entries []entry
+	var entries []map[string]any
 	for _, p := range slices.Sorted(maps.Keys(res.Files)) {
-		entries = append(entries, entry{Path: p, Mode: "100644", Type: "blob", Content: string(res.Files[p])})
+		entries = append(entries, map[string]any{"path": p, "mode": "100644", "type": "blob", "content": string(res.Files[p])})
+	}
+	// A null sha removes the path from the tree.
+	for _, p := range res.Deleted {
+		entries = append(entries, map[string]any{"path": p, "mode": "100644", "type": "blob", "sha": nil})
 	}
 	var tree struct {
 		SHA string `json:"sha"`
@@ -201,7 +199,7 @@ func (g *GitHub) commit(ctx context.Context, snap *snapshot, res *ops.Result, em
 	}
 	body := map[string]any{"message": res.CommitMessage(), "tree": tree.SHA, "parents": []string{snap.head}}
 	if email != "" {
-		body["author"] = map[string]string{"name": res.Incident.Latest().Author, "email": email}
+		body["author"] = map[string]string{"name": res.CommitAuthorName(), "email": email}
 	}
 	var c struct {
 		SHA string `json:"sha"`

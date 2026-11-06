@@ -34,6 +34,11 @@ func (l Local) Apply(ctx context.Context, op Op) (*ops.Result, error) {
 			return nil, err
 		}
 	}
+	for _, p := range res.Deleted {
+		if err := os.Remove(filepath.Join(l.Dir, filepath.FromSlash(p))); err != nil {
+			return nil, err
+		}
+	}
 	return res, nil
 }
 
