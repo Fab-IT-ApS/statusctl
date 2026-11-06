@@ -83,8 +83,8 @@ func moveMaintenance(s *model.State, ref string, from, to model.Status, impact m
 	if err != nil {
 		return nil, err
 	}
-	if cur.Kind != model.KindMaintenance {
-		return nil, inputErrorf("%s is an incident; use the incident commands", cur.ID)
+	if err := checkKind(cur, model.KindMaintenance); err != nil {
+		return nil, err
 	}
 	if st := cur.Latest().Status; st != from {
 		return nil, inputErrorf("%s is %s; it must be %s to become %s", cur.ID, st, from, to)

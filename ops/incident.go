@@ -76,8 +76,8 @@ func UpdateIncident(s *model.State, a UpdateArgs, now time.Time) (*Result, error
 	if err != nil {
 		return nil, err
 	}
-	if cur.Kind != model.KindIncident {
-		return nil, inputErrorf("%s is a maintenance window; use the maintenance commands", cur.ID)
+	if err := checkKind(cur, model.KindIncident); err != nil {
+		return nil, err
 	}
 	last := cur.Latest()
 	if last.Status.Terminal() && !a.Reopen {

@@ -141,6 +141,17 @@ func checkAuthor(a string) error {
 	return nil
 }
 
+// checkKind accepts any kind when want is empty.
+func checkKind(in *model.Incident, want model.Kind) error {
+	switch {
+	case want == "" || in.Kind == want:
+		return nil
+	case in.Kind == model.KindMaintenance:
+		return inputErrorf("%s is a maintenance window; use the maintenance commands", in.ID)
+	}
+	return inputErrorf("%s is an incident; use the incident commands", in.ID)
+}
+
 func checkComponent(cfg *model.Config, id string) error {
 	c, ok := cfg.Component(id)
 	if !ok {
