@@ -22,13 +22,27 @@ func inputErrorf(format string, args ...any) error {
 
 // Result is the event an operation produced and the files to write for it.
 type Result struct {
-	Incident *model.Incident
-	URL      string
-	Files    map[string][]byte
+	Incident     *model.Incident
+	URL          string
+	Files        map[string][]byte
+	Deleted      []string // repository paths to remove
+	Action       string   // commit-message suffix; empty means the latest status
+	CommitAuthor string   // commit author name; empty means the latest update's author
 }
 
 func (r *Result) CommitMessage() string {
-	return fmt.Sprintf("%s %s: %s", r.Incident.Kind, r.Incident.ID, r.Incident.Latest().Status)
+	what := r.Action
+	if what == "" {
+		what = string(r.Incident.Latest().Status)
+	}
+	return fmt.Sprintf("%s %s: %s", r.Incident.Kind, r.Incident.ID, what)
+}
+
+func (r *Result) CommitAuthorName() string {
+	if r.CommitAuthor != "" {
+		return r.CommitAuthor
+	}
+	return r.Incident.Latest().Author
 }
 
 // Find resolves an exact ID or a unique ID prefix.
@@ -125,6 +139,17 @@ func checkAuthor(a string) error {
 		return inputErrorf("an author is required")
 	}
 	return nil
+}
+
+// checkKind accepts any kind when want is empty.
+func checkKind(in *model.Incident, want model.Kind) error {
+	switch {
+	case want == "" || in.Kind == want:
+		return nil
+	case in.Kind == model.KindMaintenance:
+		return inputErrorf("%s is a maintenance window; use the maintenance commands", in.ID)
+	}
+	return inputErrorf("%s is an incident; use the incident commands", in.ID)
 }
 
 func checkComponent(cfg *model.Config, id string) error {

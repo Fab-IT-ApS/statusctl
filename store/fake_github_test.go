@@ -114,14 +114,19 @@ func (f *fakeGitHub) tarball(w http.ResponseWriter, r *http.Request) {
 func (f *fakeGitHub) postTree(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		BaseTree string `json:"base_tree"`
-		Tree     []struct{ Path, Mode, Type, Content string }
+		Tree     []map[string]any
 	}
 	_ = json.NewDecoder(r.Body).Decode(&body)
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	files := maps.Clone(f.trees[body.BaseTree])
 	for _, e := range body.Tree {
-		files[e.Path] = e.Content
+		p, _ := e["path"].(string)
+		if sha, ok := e["sha"]; ok && sha == nil {
+			delete(files, p)
+			continue
+		}
+		files[p], _ = e["content"].(string)
 	}
 	f.n++
 	id := fmt.Sprintf("t%d", f.n)

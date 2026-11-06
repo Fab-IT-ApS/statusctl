@@ -83,8 +83,8 @@ func moveMaintenance(s *model.State, ref string, from, to model.Status, impact m
 	if err != nil {
 		return nil, err
 	}
-	if cur.Kind != model.KindMaintenance {
-		return nil, inputErrorf("%s is an incident; use the incident commands", cur.ID)
+	if err := checkKind(cur, model.KindMaintenance); err != nil {
+		return nil, err
 	}
 	if st := cur.Latest().Status; st != from {
 		return nil, inputErrorf("%s is %s; it must be %s to become %s", cur.ID, st, from, to)
@@ -104,13 +104,15 @@ func moveMaintenance(s *model.State, ref string, from, to model.Status, impact m
 	return finish(s, in)
 }
 
-// ParseTime accepts RFC 3339, or YYYY-MM-DDTHH:MM in the site timezone.
+// ParseTime accepts RFC 3339, or YYYY-MM-DD HH:MM (or with a T) in the site timezone.
 func ParseTime(v string, loc *time.Location) (time.Time, error) {
 	if t, err := time.Parse(time.RFC3339, v); err == nil {
 		return t.UTC(), nil
 	}
-	if t, err := time.ParseInLocation("2006-01-02T15:04", v, loc); err == nil {
-		return t.UTC(), nil
+	for _, layout := range []string{"2006-01-02T15:04", "2006-01-02 15:04"} {
+		if t, err := time.ParseInLocation(layout, v, loc); err == nil {
+			return t.UTC(), nil
+		}
 	}
-	return time.Time{}, inputErrorf("time %q must be RFC 3339 (2026-11-02T22:00:00Z) or YYYY-MM-DDTHH:MM in the site timezone", v)
+	return time.Time{}, inputErrorf("time %q must be RFC 3339 (2026-11-02T22:00:00Z) or YYYY-MM-DD HH:MM in the site timezone", v)
 }

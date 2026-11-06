@@ -32,17 +32,31 @@ func (a *app) mutate(cmd *cobra.Command, authorFlag string, build func(author st
 	}
 	l := res.Incident.Latest()
 	if a.jsonOut {
-		return a.printJSON(map[string]string{
+		out := map[string]any{
 			"id": res.Incident.ID, "kind": string(res.Incident.Kind), "status": string(l.Status), "url": res.URL,
-		})
+		}
+		if res.Action != "" {
+			out["action"] = res.Action
+		}
+		// A retracted event is no longer on the page, so it has no status.
+		if len(res.Deleted) > 0 {
+			delete(out, "status")
+			out["retracted"] = true
+		}
+		return a.printJSON(out)
 	}
-	fmt.Fprintf(a.stderr, "%s %s: %s\n%s\n", res.Incident.Kind, res.Incident.ID, l.Status.Label(), res.URL)
+	what := l.Status.Label()
+	if res.Action != "" {
+		what = res.Action
+	}
+	fmt.Fprintf(a.stderr, "%s %s: %s\n%s\n", res.Incident.Kind, res.Incident.ID, what, res.URL)
 	return nil
 }
 
 func (a *app) incidentCmd() *cobra.Command {
 	cmd := &cobra.Command{Use: "incident", Short: "Open, update and resolve incidents"}
-	cmd.AddCommand(a.incidentNewCmd(), a.incidentUpdateCmd(), a.incidentResolveCmd())
+	cmd.AddCommand(a.incidentNewCmd(), a.incidentUpdateCmd(), a.incidentResolveCmd(),
+		a.editCmd(model.KindIncident), a.retractCmd(model.KindIncident))
 	return cmd
 }
 
@@ -144,7 +158,8 @@ func (a *app) maintenanceCmd() *cobra.Command {
 	cmd.AddCommand(a.maintenanceNewCmd(),
 		a.maintenanceMoveCmd("start", "Mark maintenance as in progress", ops.StartMaintenance, false),
 		a.maintenanceMoveCmd("complete", "Mark maintenance as completed", ops.CompleteMaintenance, false),
-		a.maintenanceMoveCmd("cancel", "Cancel scheduled maintenance", ops.CancelMaintenance, true))
+		a.maintenanceMoveCmd("cancel", "Cancel scheduled maintenance", ops.CancelMaintenance, true),
+		a.editCmd(model.KindMaintenance), a.retractCmd(model.KindMaintenance))
 	return cmd
 }
 
@@ -184,8 +199,8 @@ func (a *app) maintenanceNewCmd() *cobra.Command {
 	}
 	msg.register(cmd)
 	cmd.Flags().StringArrayVarP(&comps, "component", "c", nil, "affected component ID (repeatable)")
-	cmd.Flags().StringVar(&start, "start", "", "start: RFC 3339, or YYYY-MM-DDTHH:MM in the site timezone")
-	cmd.Flags().StringVar(&end, "end", "", "end: RFC 3339, or YYYY-MM-DDTHH:MM in the site timezone")
+	cmd.Flags().StringVar(&start, "start", "", "start: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
+	cmd.Flags().StringVar(&end, "end", "", "end: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
 	cmd.Flags().StringVar(&author, "author", "", "display name shown on the page")
 	return cmd
 }
@@ -213,5 +228,74 @@ func (a *app) maintenanceMoveCmd(use, short string, move moveFunc, requireMessag
 	}
 	msg.register(cmd)
 	cmd.Flags().StringVar(&author, "author", "", "display name shown on the page")
+	return cmd
+}
+
+const commitAuthorHelp = "your name, recorded in the commit (default: profile author, then git user.name)"
+
+func (a *app) editCmd(kind model.Kind) *cobra.Command {
+	var msg msgFlags
+	var title, start, end, author string
+	short := "Correct an incident's title or latest message in place"
+	if kind == model.KindMaintenance {
+		short = "Correct maintenance's title, latest message or (before it starts) its times"
+	}
+	cmd := &cobra.Command{
+		Use:   "edit ID",
+		Short: short,
+		Args:  exactArgs(1, "an ID (or unique prefix)"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			text, err := a.message(msg, false)
+			if err != nil {
+				return err
+			}
+			return a.mutate(cmd, author, func(who string) store.Op {
+				return func(s *model.State) (*ops.Result, error) {
+					e := ops.EditArgs{Ref: args[0], Kind: kind, Title: title, Message: text, Author: who}
+					for _, f := range []struct {
+						v   string
+						dst **time.Time
+					}{{start, &e.Start}, {end, &e.End}} {
+						if f.v == "" {
+							continue
+						}
+						t, err := ops.ParseTime(f.v, s.Config.Location())
+						if err != nil {
+							return nil, err
+						}
+						*f.dst = &t
+					}
+					return ops.EditEvent(s, e)
+				}
+			})
+		},
+	}
+	msg.register(cmd)
+	cmd.Flags().StringVar(&title, "title", "", "new title")
+	if kind == model.KindMaintenance {
+		cmd.Flags().StringVar(&start, "start", "", "new start: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
+		cmd.Flags().StringVar(&end, "end", "", "new end: YYYY-MM-DD HH:MM in the site timezone, or RFC 3339")
+	}
+	cmd.Flags().StringVar(&author, "author", "", commitAuthorHelp)
+	return cmd
+}
+
+func (a *app) retractCmd(kind model.Kind) *cobra.Command {
+	var author string
+	var force bool
+	cmd := &cobra.Command{
+		Use:   "retract ID",
+		Short: "Remove a mistaken " + string(kind) + " from the page (git history keeps it)",
+		Args:  exactArgs(1, "an ID (or unique prefix)"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.mutate(cmd, author, func(who string) store.Op {
+				return func(s *model.State) (*ops.Result, error) {
+					return ops.RetractEvent(s, ops.RetractArgs{Ref: args[0], Kind: kind, Author: who, Force: force}, a.now())
+				}
+			})
+		},
+	}
+	cmd.Flags().StringVar(&author, "author", "", commitAuthorHelp)
+	cmd.Flags().BoolVar(&force, "force", false, "allow retracting an event closed more than 7 days ago")
 	return cmd
 }
