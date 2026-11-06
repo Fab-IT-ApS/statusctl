@@ -36,7 +36,11 @@ statusctl incident new "Elevated API latency" -c api=degraded -m "Investigating.
 statusctl incident update 2026-10-23-elev --status identified -c api=major_outage -m "DB failover."
 statusctl incident resolve 2026-10-23-elev -m "Recovered."
 
-statusctl maintenance new "DB upgrade" -c db --start 2026-11-02T22:00 --end 2026-11-03T00:00
+statusctl incident edit 2026-10-23-elev -m "Corrected wording."
+statusctl incident retract 2026-10-23-elev          # false alarm: removes it from the page
+
+statusctl maintenance new "DB upgrade" -c db --start "2026-11-02 22:00" --end "2026-11-03 00:00"
+statusctl maintenance edit 2026-11-02-db --end "2026-11-03 01:00"
 statusctl maintenance start 2026-11-02-db
 statusctl maintenance complete 2026-11-02-db
 
@@ -46,7 +50,11 @@ statusctl list --open     # open incidents and maintenance
 
 Impacts: `operational`, `degraded`, `partial_outage`, `major_outage`.
 Messages are Markdown (`-m`, `-F file`, `-F -` for stdin, or `$EDITOR`).
-IDs accept any unique prefix. `--profile` selects an organisation.
+IDs accept any unique prefix.
+`edit` changes the title or the latest message in place (and, for maintenance that
+hasn't started, its times). `retract` removes an event from the page; it only works
+within 7 days of the event closing unless `--force` is given, and git history keeps
+the record. `--profile` selects an organisation.
 
 ## Automation
 

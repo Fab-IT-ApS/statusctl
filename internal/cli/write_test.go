@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Fab-IT-ApS/statusctl/model"
 )
@@ -168,4 +169,53 @@ func TestEditorDraftSavedOnFailure(t *testing.T) {
 	if err != nil || strings.TrimSpace(string(body)) != "Long careful explanation." {
 		t.Errorf("draft %s = %q, %v", path, body, err)
 	}
+}
+
+func TestIncidentEditAndRetract(t *testing.T) {
+	dir := newRepo(t)
+	wantCode(t, run(t, "--dir", dir, "incident", "new", "API slow", "-c", "api=degraded", "-m", "Investigating."), 0, "")
+	r := run(t, "--dir", dir, "incident", "edit", "2026-10-23-api", "-m", "Better words.", "--author", "Bo", "--json")
+	wantCode(t, r, 0, "")
+	var out struct{ ID, Action string }
+	if err := json.Unmarshal([]byte(r.stdout), &out); err != nil {
+		t.Fatalf("%v: %q", err, r.stdout)
+	}
+	if out.Action != "edited by Bo" {
+		t.Errorf("json = %+v", out)
+	}
+	in := loadRepo(t, dir).Incident("2026-10-23-api-slow")
+	if in.Latest().Message != "Better words." || in.Latest().Author != "Git User" {
+		t.Errorf("latest = %+v", in.Latest())
+	}
+	wantCode(t, run(t, "--dir", dir, "incident", "edit", "2026-10-23-api"), 2, "nothing to change")
+	wantCode(t, run(t, "--dir", dir, "incident", "retract", "2026-10-23-api"), 0, "retracted by Git User")
+	if _, err := os.Stat(filepath.Join(dir, "incidents", "2026-10-23-api-slow.json")); !os.IsNotExist(err) {
+		t.Errorf("retracted incident still on disk: %v", err)
+	}
+}
+
+func TestMaintenanceEditTimes(t *testing.T) {
+	dir := newRepo(t)
+	wantCode(t, run(t, "--dir", dir, "maintenance", "new", "DB upgrade", "-c", "api",
+		"--start", "2026-11-02 22:00", "--end", "2026-11-03 00:00"), 0, "")
+	wantCode(t, run(t, "--dir", dir, "maintenance", "edit", "2026-10-23-db", "--end", "2026-11-03 01:00"), 0, "edited by")
+	in := loadRepo(t, dir).Incident("2026-10-23-db-upgrade")
+	if want := time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC); !in.ScheduledEnd.Equal(want) {
+		t.Errorf("end = %v, want %v", in.ScheduledEnd, want)
+	}
+	wantCode(t, run(t, "--dir", dir, "incident", "retract", "2026-10-23-db"), 2, "maintenance commands")
+	wantCode(t, run(t, "--dir", dir, "maintenance", "retract", "2026-10-23-db"), 0, "retracted")
+}
+
+func TestRetractForce(t *testing.T) {
+	dir := newRepo(t)
+	wantCode(t, run(t, "--dir", dir, "incident", "new", "A", "-c", "api=degraded", "-m", "m"), 0, "")
+	wantCode(t, run(t, "--dir", dir, "incident", "resolve", "2026-10-23-a", "-m", "Fixed."), 0, "")
+	runLater := func(args ...string) result {
+		a, out, errb := newTestApp(nil)
+		a.now = func() time.Time { return testNow.Add(8 * 24 * time.Hour) }
+		return runApp(a, out, errb, append([]string{"--dir", dir, "incident", "retract", "2026-10-23-a"}, args...)...)
+	}
+	wantCode(t, runLater(), 2, "--force")
+	wantCode(t, runLater("--force"), 0, "")
 }
