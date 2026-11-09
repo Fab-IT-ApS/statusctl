@@ -8,14 +8,14 @@
 
 **Tech Stack:** Go 1.27; `github.com/Fab-IT-ApS/statusctl v0.2.0` (`model`, `ops`, `store`, `derive`); `github.com/mattermost/mattermost/server/public v0.1.16` (`plugin`, `model`, `pluginapi`, `plugin/plugintest`). v0.1.16 is the SDK released with Mattermost 10.11 (July 2025). Pinning it means the code can't call any API newer than the server.
 
-**Spec:** `docs/superpowers/specs/2026-11-06-mattermost-plugin-statusctl-design.md` (statusctl repo). The mockup (https://claude.ai/artifact/3VwV4pPE5VEfj479G72VKW) is the approved flow.
+**Spec:** `docs/superpowers/specs/2026-11-06-mattermost-plugin-statusctl-design.md` (statusctl repo).
 
 **Where:** A new repo `Fab-IT-ApS/mattermost-plugin-statusctl`, checked out at `/home/jrisch/Development/Claude/mattermost-plugin-statusctl`. Task 1 creates it locally. Creating the GitHub repo and pushing are in Task 10 and need the user's go-ahead.
 
 ## Global Constraints
 
 - Plugin ID `dk.fabit.statusctl`; `min_server_version` `10.11.0`; server-only (no webapp); MIT licence.
-- Must work on self-hosted Team Edition 10.11.5. Use no API, dialog element type, or setting type absent from SDK v0.1.16. In particular, there is no `datetime` element.
+- Must work on self-hosted Team Edition 10.11. Use no API, dialog element type, or setting type absent from SDK v0.1.16. In particular, there is no `datetime` element.
 - Dialog field label (`display_name`) is limited to 24 characters, help text to 150, `text` elements to 150, and `textarea` elements to 3000.
 - `/status` only acts in a configured status channel. Anywhere else, it replies ephemerally and names that team's status channel if one is configured.
 - Anyone who can see the status channel can post: they must be a member of the channel. There is no approval step, and changes go live immediately.
@@ -161,7 +161,7 @@
   ```
   Parsers leave `Author` empty and fill `Ref` with the event ID. The plugin layer sets the author from `label`.
 
-  Form contents, from the spec and mockup:
+  Form contents, from the spec:
   - **report** ("Report a problem", submit "Post to status page"): `title` (text, "What's wrong?", help "Shown as the headline on the status page."). Then one select per active component, named `c:<id>`, with label `fieldLabel(name)`, help set to the full name only when it was truncated, options from `impactOptions()`, and default `operational`. Then `message` (textarea, optional, "Message to customers", help `Leave blank for "We are investigating."`). The parser requires at least one component that isn't operational ("Choose at least one thing that isn't working normally."). It sends only non-operational components as `Impacts`, and uses `"We are investigating."` for a blank message.
   - **update** ("Post an update"): `status` (select, Investigating/Identified/Monitoring, defaults to the current one). One `c:<id>` select per component of the incident, defaulting to its current impact. `message` is required.
   - **resolve** ("Resolve"): `message`, optional, default text "This incident has been resolved." (my call: an incident needs a message, so the plugin supplies this one).

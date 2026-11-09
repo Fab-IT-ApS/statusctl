@@ -19,15 +19,9 @@ it. Their plan is to introduce it to every team member and back it with good,
 written documentation. So ease of use and documentation are part of the
 product, not extras.
 
-## Mockups
-
-The agreed flow is mocked up at https://claude.ai/artifact/3VwV4pPE5VEfj479G72VKW
-(private to the user). The user approved it as-is. Component names in it are
-examples.
-
 ## Context
 
-- One self-hosted Mattermost server, **Team Edition v10.11.5**, with **one team
+- One self-hosted Mattermost server, **Team Edition 10.11**, with **one team
   per org**. Each org's team gets a status channel.
 - Upgrading to Mattermost v11 is planned "at some point", date unknown. The
   plugin must work on 10.11 and use nothing newer.
@@ -116,7 +110,7 @@ the binary.
 ### The form (main path)
 
 `/status` with no arguments opens an interactive dialog. For a new incident it
-asks three things, in plain words (see mockup step 02):
+asks three things, in plain words:
 
 1. **What's wrong?** — the title.
 2. **What is affected?** — one dropdown per component from that org's
@@ -144,7 +138,7 @@ README's examples translate directly.
 
 ### The card in the channel
 
-After every change, the plugin posts a card in the channel (mockup step 03):
+After every change, the plugin posts a card in the channel:
 who did it, the event title and status, the affected components with impact,
 the message exactly as published, and a link to the org's page (`site.url`).
 Buttons:
@@ -160,8 +154,7 @@ Buttons:
 Maintenance cards get the maintenance equivalents (Start, Complete, Cancel,
 Edit, Retract).
 
-After a retraction, the plugin posts a short note in the channel (mockup step
-04): what was retracted, who posted it, who retracted it, and that the record
+After a retraction, the plugin posts a short note in the channel: what was retracted, who posted it, who retracted it, and that the record
 stays in the repo's history. Customers see nothing.
 
 *(My call: buttons on older cards act on the event's current state, not on the
